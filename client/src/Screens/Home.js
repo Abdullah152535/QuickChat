@@ -1,11 +1,13 @@
 import React from "react";
 import { BsEmojiSmile } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const Home = () => {
 
-    const roomOptions = ['ABC', 'XYZ', '123', 'PQR'];
+  const roomOptions = ['ABC', 'XYZ', '123', 'PQR'];
 
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(roomOptions[0]);
 
@@ -16,7 +18,7 @@ const Home = () => {
       <div className=" w-[450px] h-[350px] bg-blue-500  mx-auto mt-[50px]">
         <div className="h-[60px]  bg-blue-600 flex justify-center items-center ">
           <div className="mx-1 ">
-            {" "}
+           
             <BsEmojiSmile className="h-[40px] w-[30px] text-white " />
           </div>
 
@@ -30,6 +32,7 @@ const Home = () => {
           {/* Text Input field */}
           <input
             type="text"
+            name="username"
             value={username}
             onChange={(event) => {
               setUsername(event.target.value);
@@ -43,7 +46,7 @@ const Home = () => {
           {/* Drop Down Box */}
 
           <select
-
+            name="room"
             value={selectedRoom}
             onChange={(event) => {
               setSelectedRoom(event.target.value);
@@ -62,9 +65,11 @@ const Home = () => {
             ))}
           </select>
 
-          <button className="border border-black my-10 bg-gray-300 h-[35px] w-[80%] mx-9 text-blue-500 "
+          <button className="border border-black my-10 bg-gray-300 h-[35px] w-[80%] mx-9 text-blue-500  transition-colors duration-300 ease-in-out transform hover:bg-gray-400 active:bg-gray-500"
            onClick={()=>{
-
+            navigate('/Chat', {
+              state: {username, selectedRoom}
+            })
            }}
           >
             Join Chat
