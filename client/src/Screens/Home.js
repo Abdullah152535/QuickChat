@@ -33,7 +33,9 @@ const Home = () => {
           <input
             type="text"
             name="username"
+            id="username"
             value={username}
+            autoComplete="on"
             onChange={(event) => {
               setUsername(event.target.value);
             }}
@@ -47,6 +49,7 @@ const Home = () => {
 
           <select
             name="room"
+            id="room"
             value={selectedRoom}
             onChange={(event) => {
               setSelectedRoom(event.target.value);

@@ -1,29 +1,79 @@
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect,useRef} from 'react'
 import { BsEmojiSmile } from "react-icons/bs";
+
 import {PiChatsCircle} from  'react-icons/pi';
 import { useLocation } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+// import socket from '../utility/socket'
 import io from 'socket.io-client';
-
 
 const Chat = () => {
 
+  
   const [message, setMessage] = useState("");
-  const [receivedMessage, setReceivedMessage] = useState("");
+  const [receivedMessages, setReceivedMessages] = useState([]);
+  // const [socket,setSocket] = useState(null)
+  const socket = useRef(null);
 
   const location = useLocation();
-
-  const { username, selectedRoom } = location.state;
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', { transports : ['websocket'] });
+    // Initialize the socket instance only once
+    if (!socket.current) {
+      socket.current = io('http://localhost:5000', { transports: ['websocket'] });
+      
+      // Listen to 'message' events
+      socket.current.on('message', (msg) => {
+        setReceivedMessages((prevMessages) => [...prevMessages, msg]);
+      });
+      
+      // Clean up the socket on component unmount
+      // return () => {
+      //   socket.current.disconnect();
+      // };
+    }
+  }, []);
 
-    // Listening for messages from the server
-    socket.on('message', (message) => {
-      // setReceivedMessage(message);
-      console.log(message);
-    })
+  // useEffect(() => {
+  
+  //     const newSocket = io('http://localhost:5000', { transports: ['websocket'] });
+  //     setSocket(newSocket);
+     
     
-  },[]);
+      
+  // }, []);
+
+
+  useEffect(()=>{
+    if(socket.current){
+      socket.current.on('message', (msg)=>{
+        setReceivedMessages((prevMessages) => [...prevMessages, msg]);
+      })
+   
+      
+      return () => {
+        socket.current.off('message');
+      };
+    }
+  })
+
+
+   if(location.state==undefined){return(<div>Can't access this resource</div>)}
+  const { username, selectedRoom } = location.state;
+
+ 
+
+
+  const sendMessage = (msg) =>{
+    setMessage('')
+    socket.current.emit('chatMessage',message);
+  }
+
+  const leaveRoom = (msg) =>{
+    socket.current.emit('disconnect')
+     navigate('/')
+  }
  
   return (
   
@@ -43,7 +93,7 @@ const Chat = () => {
         </div>
 
 
-         <button className='w-[130px] mx-10 bg-white transition-colors duration-300 ease-in-out transform hover:bg-gray-400 active:bg-gray-500'>
+         <button onClick={leaveRoom} className='w-[130px] mx-10 bg-white transition-colors duration-300 ease-in-out transform hover:bg-gray-400 active:bg-gray-500'>
           Leave Room
          </button>
 
@@ -66,9 +116,22 @@ const Chat = () => {
 
           </div>
 
-          <div className='h-[100%] w-[70%] bg-white'></div>
+          {/* chats Should be displayed here */}
 
-        </div>
+          <div className='h-[100%] w-[70%] bg-white overflow-y-scroll   '>
+              <div className='bg-gray-300 p-2 mx-5 my-3 font-bold'>Hello {username}, Welcome to ChatCord</div>
+             { console.log(receivedMessages.length)}
+              {
+              receivedMessages.map((msg,index)=>(
+                 <div key={index} className='bg-gray-300 p-2 mx-5 my-3'> {msg}</div>
+              ))
+}
+          </div>
+
+          
+             
+
+          </div>
 
         {/* Div for bottom Part */}
 
@@ -83,7 +146,8 @@ const Chat = () => {
             className="h-[35px] ml-9 px-2 w-[80%]"
           />
 
-          <button className='w-[90px] bg-gray-200 h-[35px] text-blue-400 transition-colors duration-300 ease-in-out transform hover:bg-gray-300 active:bg-gray-500'>
+          <button className='w-[90px] ml-1 bg-gray-200 h-[35px] text-blue-400 transition-colors duration-300 ease-in-out transform hover:bg-gray-300 active:bg-gray-500'
+          onClick={sendMessage}>
             Send
           </button>
         </div>

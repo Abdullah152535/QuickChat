@@ -14,6 +14,7 @@ function App() {
             <Route path="/Chat" element={<Chat />} />
 
             </Routes>
+            
     </Router>
 
     </div>
