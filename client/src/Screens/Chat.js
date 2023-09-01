@@ -14,6 +14,10 @@ const Chat = () => {
   const [receivedMessages, setReceivedMessages] = useState([]);
   // const [socket,setSocket] = useState(null)
   const socket = useRef(null);
+  const chatContainerRef = useRef();
+  const inputRef = useRef();
+
+
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,6 +49,14 @@ const Chat = () => {
   // }, []);
 
 
+      
+    // Scroll to the bottom of the chat container whenever new messages arrive
+    useEffect(() => {
+        const chatContainer = chatContainerRef.current;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, [receivedMessages]);
+
+
   useEffect(()=>{
     if(socket.current){
       socket.current.on('message', (msg)=>{
@@ -65,13 +77,14 @@ const Chat = () => {
  
 
 
-  const sendMessage = (msg) =>{
-    setMessage('')
-    socket.current.emit('chatMessage',message);
+  const sendMessage = () =>{
+    // setMessage('')
+    inputRef.current.focus();
+    socket.current.emit('chatMessage',{message,username});
   }
 
   const leaveRoom = (msg) =>{
-    socket.current.emit('disconnect')
+    socket.current.disconnect()
      navigate('/')
   }
  
@@ -118,12 +131,20 @@ const Chat = () => {
 
           {/* chats Should be displayed here */}
 
-          <div className='h-[100%] w-[70%] bg-white overflow-y-scroll   '>
-              <div className='bg-gray-300 p-2 mx-5 my-3 font-bold'>Hello {username}, Welcome to ChatCord</div>
+          <div className='h-[100%] w-[70%] bg-white overflow-y-scroll ' ref={chatContainerRef} >
+              
              { console.log(receivedMessages.length)}
               {
               receivedMessages.map((msg,index)=>(
-                 <div key={index} className='bg-gray-300 p-2 mx-5 my-3'> {msg}</div>
+                 <div key={index} className='bg-gray-300 p-2 mx-5 my-3'> 
+                   <div className='flex'>
+                      <div className='text-blue-400 text-xs mx-1'>{msg.username} </div>
+                      <div className='text-[10px] mx-1' >{msg.time} </div>
+                   </div>
+                   <div>
+                    {msg.text}
+                   </div>
+                 </div>
               ))
 }
           </div>
@@ -139,6 +160,7 @@ const Chat = () => {
         <input
             type="text"
             value={message}
+            ref={inputRef}
             onChange={(event) => {
               setMessage(event.target.value);
             }}

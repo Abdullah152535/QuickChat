@@ -11,23 +11,25 @@
     }));
 
   const server = http.createServer(app);
-
+  const formatMessage = require('./utils/formatMessage')
   const io = socketio(server);
 
-
+  const botName = "QuickChat Bot"
 
   io.on('connection', socket=>{
       console.log(`New Connection Created with socket id ${socket.id}` );
 
-      socket.broadcast.emit('message', 'A User has Joined the Chat');
+      socket.emit('message',formatMessage(botName,'Welcome to QuickChat'))
+
+      socket.broadcast.emit('message', formatMessage(botName,'A User has joined the Chat'));
 
       socket.on('disconnect',()=>{
-        io.emit('message','A User has left the Chat')
+        io.emit('message',formatMessage(botName,'A User has left the Chat'))
       });
 
-      socket.on('chatMessage' ,msg=>{
-        // console.log(msg)
-        io.emit('message',msg);
+      socket.on('chatMessage' ,info=>{
+        // console.log(`${info.username} ${info.message}`)
+        io.emit('message',formatMessage(info.username,info.message))
       })
 
   })
