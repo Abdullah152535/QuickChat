@@ -27,15 +27,7 @@ const Chat = () => {
     if (!socket.current) {
       socket.current = io('http://localhost:5000', { transports: ['websocket'] });
       
-      // Listen to 'message' events
-      socket.current.on('message', (msg) => {
-        setReceivedMessages((prevMessages) => [...prevMessages, msg]);
-      });
-      
-      // Clean up the socket on component unmount
-      // return () => {
-      //   socket.current.disconnect();
-      // };
+      socket.current.emit('joinRoom', { username, room: selectedRoom });
     }
   }, []);
 
@@ -71,7 +63,7 @@ const Chat = () => {
   })
 
 
-   if(location.state==undefined){return(<div>Can't access this resource</div>)}
+   if(location.state===undefined){return(<div>Can't access this resource</div>)}
   const { username, selectedRoom } = location.state;
 
  
